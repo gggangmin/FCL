@@ -23,6 +23,7 @@ class Server(ServerModule):
         cids = np.arange(self.args.num_clients).tolist()
         num_selection = int(round(self.args.num_clients*self.args.frac_clients))
         for curr_round in range(self.args.num_rounds*self.args.num_tasks):
+        # round 수행
             self.updates = []
             self.curr_round = curr_round+1
             self.is_last_round = self.curr_round%self.args.num_rounds==0
@@ -38,11 +39,13 @@ class Server(ServerModule):
                     selected = True if cid in selected_ids else False
                     with tf.device('/device:GPU:{}'.format(gid)):
                         thrd = threading.Thread(target=self.invoke_client, args=(client, cid, curr_round, selected, self.get_weights(), self.get_adapts()))
+                        # invoke_client 함수를 통해 clinet 동작
                         self.threads.append(thrd)
                         thrd.start()
                 # wait all threads each round
                 for thrd in self.threads:
                     thrd.join()
+                    # 해당 thread들이 멈출때까지 기다림
             # update
             aggr = self.train.aggregate(self.updates)
             self.set_weights(aggr)
@@ -51,10 +54,12 @@ class Server(ServerModule):
 
     def invoke_client(self, client, cid, curr_round, selected, weights, adapts):
         update = client.train_one_round(cid, curr_round, selected, weights, adapts)
+        # weights = global weights, adpats = knowledge base 의미
         if not update == None:
             self.updates.append(update)
             if self.is_last_round:
                 self.client_adapts.append(client.get_adaptives())
+                # 마지막 round에 각 클라이언트로부터 knowledge base 더하기
 
     def get_adapts(self):
         if self.curr_round%self.args.num_rounds==1 and not self.curr_round==1:
@@ -69,7 +74,7 @@ class Server(ServerModule):
                         else:
                             from_kb_l[:,:,cid] = ca[lid]
                     except:
-                        pdb.set_trace()           
+                        pdb.set_trace()
                 from_kb.append(from_kb_l)
             return from_kb
         else:

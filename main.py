@@ -28,6 +28,8 @@ def main(args):
         if args.model == 'fedweit':
             from models.fedweit.server import Server
             server = Server(args)
+            # 멀티 gpu 환경에서 동작하도록 구성
+            # modules/federated.py에서 상속하여 사용
             server.run()
         
         else:

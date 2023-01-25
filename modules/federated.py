@@ -66,6 +66,7 @@ class ServerModule:
         self.parallel_clients = []
         for i in range(num_iteration):
             offset = i*num_gpus
+            # 각 task마다 gpu 할당해서 수행
             self.parallel_clients.append(np.arange(num_gpus)+offset)
         if residuals>0:
             offset = self.parallel_clients[-1][-1]+1

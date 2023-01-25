@@ -17,16 +17,20 @@ class Client(ClientModule):
         self.state['gpu_id'] = gid
 
     def train_one_round(self, client_id, curr_round, selected, global_weights=None, from_kb=None):
+        # 실제 학습을 위한 모듈
         ######################################
         self.switch_state(client_id)
         ######################################
         self.state['round_cnt'] += 1
         self.state['curr_round'] = curr_round
         
+        # knowledge base 
         if not from_kb == None:
             for lid, weights in enumerate(from_kb):
+                # lid는 layer id
                 tid = self.state['curr_task']+1
                 self.nets.decomposed_variables['from_kb'][tid][lid].assign(weights)
+                # assign 메소드를 통해 tf 변수 변경
         
         if self.state['curr_task']<0:
             self.init_new_task()
@@ -47,10 +51,12 @@ class Client(ClientModule):
             else:
                 self.load_data()
 
+        # selected(T,F)
         if selected:
             self.set_weights(global_weights)
 
         with tf.device('/device:GPU:{}'.format(self.state['gpu_id'])):
+            # module/train.py의 train_one_round 수행
             self.train.train_one_round(self.state['curr_round'], self.state['round_cnt'], self.state['curr_task'])
         
         self.logger.save_current_state(self.state['client_id'], {
