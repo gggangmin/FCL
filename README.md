@@ -74,3 +74,11 @@ All clients and server create their own log files in `\path\to\output\logs\`, wh
     url={https://arxiv.org/abs/2003.03196}
 }
 ```
+
+## Issue
+```
+cuda 10.1 error about libcublas10
+https://github.com/tensorflow/tensorflow/issues/26182#issuecomment-684993950
+
+cudnn must be newer than 7.6.4
+```
